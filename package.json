@@ -10,7 +10,10 @@
     "seed": "cd server && npm run seed",
     "build": "cd client && npm run build"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@apollo/client": "^3.12.8",
+    "graphql": "^16.10.0"
+  },
   "devDependencies": {
     "concurrently": "^8.2.0"
   }
