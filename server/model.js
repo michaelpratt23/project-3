@@ -1,17 +1,9 @@
 const { Schema, model } = require("mongoose");
 const bcrypt = require("bcrypt");
 
-// User schema
 const userSchema = new Schema({
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
 });
 
 userSchema.pre("save", async function (next) {
@@ -25,31 +17,12 @@ userSchema.methods.isCorrectPassword = async function (password) {
   return bcrypt.compare(password, this.password);
 };
 
-// Task schema
 const taskSchema = new Schema({
-  title: {
-    type: String,
-    required: true,
-  },
-  description: {
-    type: String,
-    default: "",
-  },
-  status: {
-    type: String,
-    default: "To Do",
-  },
-  owner: {
-    type: Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
-  collaborators: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-    },
-  ],
+  title: { type: String, required: true },
+  description: { type: String, default: "" },
+  status: { type: String, default: "To Do" },
+  owner: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  collaborators: [{ type: Schema.Types.ObjectId, ref: "User" }],
 });
 
 const User = model("User", userSchema);

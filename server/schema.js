@@ -7,7 +7,6 @@ const typeDefs = gql`
     _id: ID
     email: String!
   }
-
   type Task {
     _id: ID
     title: String!
@@ -16,7 +15,6 @@ const typeDefs = gql`
     owner: User
     collaborators: [User]
   }
-
   type Auth {
     token: String
     user: User
@@ -37,63 +35,41 @@ const typeDefs = gql`
 
 const resolvers = {
   Query: {
-    me: async (parent, args, context) => {
-      if (context.user) {
-        return User.findById(context.user._id);
-      }
-      throw new Error("Not authenticated");
-    },
-    tasks: async (parent, args, context) => {
-      if (context.user) {
-        return Task.find({
-          $or: [
-            { owner: context.user._id },
-            { collaborators: context.user._id },
-          ],
-        });
-      }
-      throw new Error("Not authenticated");
-    },
+    me: async (parent, args, context) =>
+      context.user ? User.findById(context.user._id) : null,
+    tasks: async (parent, args, context) =>
+      context.user
+        ? Task.find({
+            $or: [
+              { owner: context.user._id },
+              { collaborators: context.user._id },
+            ],
+          })
+        : [],
   },
   Mutation: {
     signup: async (parent, { email, password }) => {
       const user = await User.create({ email, password });
-      const token = signToken(user);
-      return { token, user };
+      return { token: signToken(user), user };
     },
     login: async (parent, { email, password }) => {
       const user = await User.findOne({ email });
-      if (!user || !(await user.isCorrectPassword(password))) {
+      if (!user || !(await user.isCorrectPassword(password)))
         throw new Error("Invalid credentials");
-      }
-      const token = signToken(user);
-      return { token, user };
+      return { token: signToken(user), user };
     },
     createTask: async (parent, { title, description }, context) => {
-      if (context.user) {
-        return Task.create({
-          title,
-          description,
-          owner: context.user._id,
-        });
-      }
+      if (context.user)
+        return Task.create({ title, description, owner: context.user._id });
       throw new Error("Not authenticated");
     },
     inviteCollaborator: async (parent, { taskId, email }, context) => {
-      if (context.user) {
-        const userToInvite = await User.findOne({ email });
-        if (!userToInvite) {
-          throw new Error("User not found");
-        }
-        const task = await Task.findById(taskId);
-        if (!task || task.owner.toString() !== context.user._id) {
-          throw new Error("Not authorized");
-        }
-        task.collaborators.push(userToInvite._id);
-        await task.save();
-        return task;
-      }
-      throw new Error("Not authenticated");
+      const user = await User.findOne({ email });
+      const task = await Task.findById(taskId);
+      if (task.owner.toString() !== context.user._id)
+        throw new Error("Not authorized");
+      task.collaborators.push(user._id);
+      return task.save();
     },
   },
 };

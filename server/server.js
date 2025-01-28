@@ -8,10 +8,8 @@ const { authMiddleware } = require("./auth");
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Connect to MongoDB
 connectDB();
 
-// Set up Apollo Server
 const server = new ApolloServer({
   typeDefs,
   resolvers,
@@ -21,8 +19,7 @@ const server = new ApolloServer({
 (async () => {
   await server.start();
   app.use("/graphql", expressMiddleware(server));
-  app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-    console.log(`GraphQL endpoint: http://localhost:${PORT}/graphql`);
-  });
+  app.listen(PORT, () =>
+    console.log(`Server running on http://localhost:${PORT}`)
+  );
 })();

@@ -1,9 +1,16 @@
 import React, { useState } from "react";
-import { useMutation } from "@apollo/client";
-import { SIGNUP_USER } from "../graphql";
+import { useMutation, gql } from "@apollo/client";
 import { useNavigate } from "react-router-dom";
 
-const Signup = () => {
+const SIGNUP_USER = gql`
+  mutation Signup($email: String!, $password: String!) {
+    signup(email: $email, password: $password) {
+      token
+    }
+  }
+`;
+
+function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [signup] = useMutation(SIGNUP_USER);
@@ -16,27 +23,30 @@ const Signup = () => {
       localStorage.setItem("id_token", data.signup.token);
       navigate("/");
     } catch (err) {
-      console.error(err);
+      console.error("Signup failed:", err.message);
     }
   };
 
   return (
     <form onSubmit={handleSubmit}>
+      <h2>Signup</h2>
       <input
         type="email"
         placeholder="Email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
+        required
       />
       <input
         type="password"
         placeholder="Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+        required
       />
-      <button type="submit">Sign Up</button>
+      <button type="submit">Signup</button>
     </form>
   );
-};
+}
 
 export default Signup;
