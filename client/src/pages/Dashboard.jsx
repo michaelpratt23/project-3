@@ -11,6 +11,8 @@ const Dashboard = () => {
   const [updateTask] = useMutation(UPDATE_TASK);
   const [deleteTask] = useMutation(DELETE_TASK);
 
+console.log(loading);
+
   const [currentTask, setCurrentTask] = useState(null);
   const tasks = data?.tasks || [];
 
