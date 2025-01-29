@@ -1,12 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-const TaskForm = ({ handleSaveTask }) => {
+const TaskForm = ({ handleSaveTask, editingTask }) => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    status: "To Do", // Default value
-    dueDate: "", // Default value
+    status: "To Do",
+    dueDate: "",
   });
+
+  // Update formData when editingTask changes
+  useEffect(() => {
+    if (editingTask) {
+      setFormData({
+        title: editingTask.title,
+        description: editingTask.description,
+        status: editingTask.status,
+        dueDate: editingTask.dueDate,
+      });
+    } else {
+      setFormData({
+        title: "",
+        description: "",
+        status: "To Do",
+        dueDate: "",
+      });
+    }
+  }, [editingTask]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -15,17 +34,7 @@ const TaskForm = ({ handleSaveTask }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (typeof handleSaveTask === "function") {
-      handleSaveTask(formData); // Pass formData to handleSaveTask
-      setFormData({
-        title: "",
-        description: "",
-        status: "To Do",
-        dueDate: "",
-      }); // Reset the form after submission
-    } else {
-      console.error("handleSaveTask is not a function");
-    }
+    handleSaveTask(formData);
   };
 
   return (
@@ -55,7 +64,7 @@ const TaskForm = ({ handleSaveTask }) => {
         value={formData.dueDate}
         onChange={handleChange}
       />
-      <button type="submit">Save Task</button>
+      <button type="submit">{editingTask ? "Update Task" : "Save Task"}</button>
     </form>
   );
 };

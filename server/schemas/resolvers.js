@@ -71,32 +71,48 @@ const resolvers = {
       { taskId, title, description, status, dueDate },
       context
     ) => {
-      if (context.user) {
-        return Task.findOneAndUpdate(
-          { _id: taskId, user: context.user._id },
+      if (!context.user) {
+        throw new AuthenticationError(
+          "You must be logged in to update a task."
+        );
+      }
+
+      try {
+        const updatedTask = await Task.findByIdAndUpdate(
+          taskId,
           { title, description, status, dueDate },
           { new: true }
         );
+
+        return updatedTask;
+      } catch (error) {
+        console.error("Error updating task:", error);
+        throw new Error("Failed to update task.");
       }
-      throw new AuthenticationError("You need to be logged in!");
     },
     // Delete a task
     deleteTask: async (parent, { taskId }, context) => {
-      if (context.user) {
-        const task = await Task.findOneAndDelete({
-          _id: taskId,
-          user: context.user._id,
-        });
+      if (!context.user) {
+        throw new AuthenticationError(
+          "You must be logged in to delete a task."
+        );
+      }
 
+      try {
+        const deletedTask = await Task.findByIdAndDelete(taskId);
+
+        // Remove the task from the user's task list
         await User.findByIdAndUpdate(
           context.user._id,
-          { $pull: { tasks: task._id } },
+          { $pull: { tasks: taskId } },
           { new: true }
         );
 
-        return task;
+        return deletedTask;
+      } catch (error) {
+        console.error("Error deleting task:", error);
+        throw new Error("Failed to delete task.");
       }
-      throw new AuthenticationError("You need to be logged in!");
     },
   },
 };
