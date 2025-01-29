@@ -1,48 +1,56 @@
-import React, { useState } from "react";
+import React from "react";
+import TaskForm from "../components/TaskForm"; // Import TaskForm
 import { useQuery, useMutation } from "@apollo/client";
-import { GET_TASKS } from "../utils/queries";
-import { ADD_TASK, UPDATE_TASK, DELETE_TASK } from "../utils/mutations";
-import TaskList from "../components/TaskList";
-import TaskForm from "../components/TaskForm";
+import { GET_TASKS } from "../utils/queries"; // Query to fetch tasks
+import { ADD_TASK } from "../utils/mutations"; // Mutation to add tasks
 
 const Dashboard = () => {
-  const { loading, data, refetch } = useQuery(GET_TASKS);
+  // Query to fetch tasks
+  const { loading, error, data, refetch } = useQuery(GET_TASKS);
+
+  // Mutation to add a task
   const [addTask] = useMutation(ADD_TASK);
-  const [updateTask] = useMutation(UPDATE_TASK);
-  const [deleteTask] = useMutation(DELETE_TASK);
 
-console.log(loading);
-
-  const [currentTask, setCurrentTask] = useState(null);
-  const tasks = data?.tasks || [];
-
+  // Function to handle saving a task
   const handleSaveTask = async (taskData) => {
-    if (currentTask) {
-      await updateTask({ variables: { ...taskData, taskId: currentTask._id } });
-    } else {
-      await addTask({ variables: taskData });
+    try {
+      const { data } = await addTask({
+        variables: {
+          title: taskData.title,
+          description: taskData.description || "",
+          status: taskData.status || "To Do",
+          dueDate: taskData.dueDate || null,
+        },
+      });
+      console.log("Task added successfully:", data.addTask);
+      refetch(); // Refresh the task list after adding a task
+    } catch (err) {
+      console.error("Error adding task:", err);
     }
-    setCurrentTask(null);
-    refetch();
   };
 
-  const handleDeleteTask = async (taskId) => {
-    await deleteTask({ variables: { taskId } });
-    refetch();
-  };
+  // Display loading or error states
+  if (loading) return <p>Loading tasks...</p>;
+  if (error) return <p>Error loading tasks: {error.message}</p>;
+
+  // Render the task list
+  const tasks = data.tasks;
 
   return (
-    <div>
-      <TaskList
-        tasks={tasks}
-        onEdit={setCurrentTask}
-        onDelete={handleDeleteTask}
-      />
-      <TaskForm
-        task={currentTask}
-        onSave={handleSaveTask}
-        onCancel={() => setCurrentTask(null)}
-      />
+    <div className="dashboard-container">
+      <h2>Dashboard</h2>
+      <TaskForm handleSaveTask={handleSaveTask} /> {/* Pass handleSaveTask as a prop */}
+      <h3>Your Tasks</h3>
+      <ul className="task-list">
+        {tasks.map((task) => (
+          <li key={task._id} className="task-item">
+            <h4>{task.title}</h4>
+            <p>{task.description}</p>
+            <p>Status: {task.status}</p>
+            <p>Due Date: {task.dueDate || "No due date"}</p>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };

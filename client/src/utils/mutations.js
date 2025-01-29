@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client";
 
-// Mutation: Add a new user
+// Add a new user (Signup)
 export const ADD_USER = gql`
   mutation addUser($username: String!, $email: String!, $password: String!) {
     addUser(username: $username, email: $email, password: $password) {
@@ -14,7 +14,7 @@ export const ADD_USER = gql`
   }
 `;
 
-// Mutation: Login an existing user
+// Login an existing user
 export const LOGIN_USER = gql`
   mutation login($email: String!, $password: String!) {
     login(email: $email, password: $password) {
@@ -22,12 +22,13 @@ export const LOGIN_USER = gql`
       user {
         _id
         username
+        email
       }
     }
   }
 `;
 
-// Mutation: Add a new task
+// Add a new task
 export const ADD_TASK = gql`
   mutation addTask(
     $title: String!
@@ -46,12 +47,11 @@ export const ADD_TASK = gql`
       description
       status
       dueDate
-      createdAt
     }
   }
 `;
 
-// Mutation: Update an existing task
+// Update an existing task
 export const UPDATE_TASK = gql`
   mutation updateTask(
     $taskId: ID!
@@ -76,7 +76,7 @@ export const UPDATE_TASK = gql`
   }
 `;
 
-// Mutation: Delete a task
+// Delete a task
 export const DELETE_TASK = gql`
   mutation deleteTask($taskId: ID!) {
     deleteTask(taskId: $taskId) {

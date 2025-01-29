@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useMutation } from "@apollo/client";
 import { LOGIN_USER } from "../utils/mutations";
+import Auth from "../utils/auth";
 
 const Login = () => {
   const [formState, setFormState] = useState({ email: "", password: "" });
@@ -8,42 +9,49 @@ const Login = () => {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setFormState({ ...formState, [name]: value });
+    setFormState({
+      ...formState,
+      [name]: value,
+    });
   };
 
-  const handleSubmit = async (event) => {
+  const handleFormSubmit = async (event) => {
     event.preventDefault();
     try {
       const { data } = await login({
         variables: { ...formState },
       });
-      localStorage.setItem("id_token", data.login.token);
-      window.location.assign("/");
+      // Save the token and redirect to the dashboard
+      Auth.login(data.login.token);
     } catch (e) {
-      console.error(e);
+      console.error("Error logging in:", e);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <div className="login-container">
       <h2>Login</h2>
-      <input
-        name="email"
-        type="email"
-        placeholder="Email"
-        value={formState.email}
-        onChange={handleChange}
-      />
-      <input
-        name="password"
-        type="password"
-        placeholder="Password"
-        value={formState.password}
-        onChange={handleChange}
-      />
-      <button type="submit">Login</button>
-      {error && <p>Error logging in!</p>}
-    </form>
+      <form onSubmit={handleFormSubmit}>
+        <input
+          name="email"
+          type="email"
+          placeholder="Email"
+          value={formState.email}
+          onChange={handleChange}
+          required
+        />
+        <input
+          name="password"
+          type="password"
+          placeholder="Password"
+          value={formState.password}
+          onChange={handleChange}
+          required
+        />
+        <button type="submit">Login</button>
+      </form>
+      {error && <p className="error-text">Login failed. Please try again.</p>}
+    </div>
   );
 };
 

@@ -17,8 +17,10 @@ const Signup = () => {
       const { data } = await addUser({
         variables: { ...formState },
       });
+      // Save the token to localStorage
       localStorage.setItem("id_token", data.addUser.token);
-      window.location.assign("/");
+      // Redirect to the dashboard
+      window.location.assign("/dashboard");
     } catch (e) {
       console.error(e);
     }
