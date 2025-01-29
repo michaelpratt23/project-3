@@ -9,22 +9,16 @@ const Login = () => {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setFormState({
-      ...formState,
-      [name]: value,
-    });
+    setFormState({ ...formState, [name]: value });
   };
 
   const handleFormSubmit = async (event) => {
     event.preventDefault();
     try {
-      const { data } = await login({
-        variables: { ...formState },
-      });
-      // Save the token and redirect to the dashboard
-      Auth.login(data.login.token);
-    } catch (e) {
-      console.error("Error logging in:", e);
+      const { data } = await login({ variables: { ...formState } });
+      Auth.login(data.login.token); // Log in & redirect to dashboard
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -32,22 +26,8 @@ const Login = () => {
     <div className="login-container">
       <h2>Login</h2>
       <form onSubmit={handleFormSubmit}>
-        <input
-          name="email"
-          type="email"
-          placeholder="Email"
-          value={formState.email}
-          onChange={handleChange}
-          required
-        />
-        <input
-          name="password"
-          type="password"
-          placeholder="Password"
-          value={formState.password}
-          onChange={handleChange}
-          required
-        />
+        <input name="email" type="email" placeholder="Email" value={formState.email} onChange={handleChange} required />
+        <input name="password" type="password" placeholder="Password" value={formState.password} onChange={handleChange} required />
         <button type="submit">Login</button>
       </form>
       {error && <p className="error-text">Login failed. Please try again.</p>}
