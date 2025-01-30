@@ -5,6 +5,7 @@ const { typeDefs, resolvers } = require("./schemas");
 const db = require("./config/connection");
 const { authMiddleware } = require("./utils/auth");
 require("dotenv").config();
+const path = require("path");
 
 const PORT = process.env.PORT || 3001;
 
@@ -26,6 +27,11 @@ const server = new ApolloServer({
       context: authMiddleware,
     })
   );
+
+  app.use(express.static(path.join(__dirname, "../client/dist")));
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "../client/dist/index.html"));
+  });
 
   // Database connection
   db.once("open", () => {
